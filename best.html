@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>BES Hesaplama</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body { font-family: Arial; padding:20px; }
+input, select { margin:5px; }
+.tooltip { cursor:pointer; color:blue; }
+</style>
+</head>
+<body>
+
+<h2>BES Hesaplama Aracı</h2>
+
+<label>Yaş <span class="tooltip" onclick="alert('Sisteme giriş yaşınızı giriniz')">?</span></label>
+<input type="number" id="yas"><br>
+
+<label>Emeklilik Yaşı <span class="tooltip" onclick="alert('Emekli olmak istediğiniz yaşı giriniz')">?</span></label>
+<input type="number" id="emekliYas"><br>
+
+<label>Ödeme Türü <span class="tooltip" onclick="alert('Ne sıklıkla ödeme yapacağınızı seçiniz')">?</span></label>
+<select id="odeme">
+<option value="12">Aylık</option>
+<option value="4">3 Aylık</option>
+<option value="2">6 Aylık</option>
+<option value="1">Yıllık</option>
+</select><br>
+
+<label>Aylık Katkı (₺) <span class="tooltip" onclick="alert('Her ödeme döneminde yatırılacak tutar')">?</span></label>
+<input type="number" id="katki" value="2500"><br>
+
+<label>Yıllık Artış (%) <span class="tooltip" onclick="alert('Katkı payının yıllık artış oranı')">?</span></label>
+<input type="number" id="artis" value="10"><br>
+
+<label>Reel Getiri (%) <span class="tooltip" onclick="alert('Yıllık net kazanç oranı')">?</span></label>
+<input type="number" id="getiri" value="3"><br>
+
+<button onclick="hesapla()">Hesapla</button>
+
+<h3>Sonuç</h3>
+<p id="sonuc"></p>
+
+<canvas id="grafik"></canvas>
+
+<script>
+function hesapla(){
+ let yas = parseInt(document.getElementById('yas').value);
+ let emekliYas = parseInt(document.getElementById('emekliYas').value);
+ let odeme = parseInt(document.getElementById('odeme').value);
+ let katki = parseFloat(document.getElementById('katki').value);
+ let artis = parseFloat(document.getElementById('artis').value)/100;
+ let getiri = parseFloat(document.getElementById('getiri').value)/100;
+ 
+ let yil = emekliYas - yas;
+ let toplam = 0;
+ let devlet = 0;
+ let veri = [];
+ 
+ for(let i=0;i<yil;i++){
+   let yillikKatki = katki * odeme;
+   toplam += yillikKatki;
+   devlet += yillikKatki * 0.20;
+   toplam *= (1+getiri);
+   veri.push(toplam);
+   katki *= (1+artis);
+ }
+ 
+ document.getElementById('sonuc').innerHTML = 
+ "Toplam Birikim: " + Math.round(toplam) + " ₺<br>Devlet Katkısı: " + Math.round(devlet);
+ 
+ let ctx = document.getElementById('grafik');
+ new Chart(ctx, {
+   type: 'line',
+   data: {
+     labels: veri.map((_,i)=> i+1),
+     datasets: [{ label: 'Birikim', data: veri }]
+   }
+ });
+}
+</script>
+
+</body>
+</html>
